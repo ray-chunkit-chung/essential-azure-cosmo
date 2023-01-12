@@ -101,12 +101,6 @@ Initiate collection
 python src/initiate_collection.py
 ```
 
-Run SQL query
-```bash
-# TODO: debug
-python src/run_sql_query.py
-```
-
 ## Step 3 SQL Query
 
 <https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/sdk-dotnet-v3>
@@ -117,10 +111,17 @@ python src/run_sql_query.py
 
 <https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/tutorial-dotnet-web-app>
 
+Run SQL query
+
 ```sql
-SELECT * 
-FROM Families f 
-WHERE f.id = "WakefieldFamily"
+SELECT *
+FROM products p
+WHERE p.categoryId = @categoryId
+```
+
+```bash
+# TODO: debug
+python src/run_sql_query.py
 ```
 
 ## Finally Delete resources
