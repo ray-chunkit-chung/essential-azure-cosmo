@@ -1,12 +1,125 @@
-# essential-azure-function
+# essential-azure-cosmos
 
-essential-azure-function
+essential-azure-cosmos
 
-<https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Clinux%2Cpython%2Cportal%2Cbash#local-settings-file>
+<https://learn.microsoft.com/en-us/azure/cosmos-db/introduction>
 
-<https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-python?pivots=python-mode-decorators>
+<https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/quickstart-python?tabs=azure-cli%2Cvenv-windows%2Clinux>
+
+<https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/tutorial-query>
 
 using dockerhub desktop container dev env with vscode
+
+## Step 1 Create a cosmos resource
+
+We need a function app to publish the function
+<https://learn.microsoft.com/en-us/azure/azure-functions/scripts/functions-cli-create-serverless>
+
+Install azure cli
+
+```bash
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+```
+
+Set app variables by saving in .env file
+
+```bash
+export SUBSCRIPTION="xxx"
+export TENANT="xxx"
+export LOCATION="eastus"
+export RESOURCE_GROUP="xxx"
+export STORAGE_ACCOUNT="xxx"
+export SKU_STORAGE="Standard_LRS"
+export FUNCTION_APP="xxx"
+export FUNCTION_VERSION="4"
+export PYTHON_VERSION="3.9"
+```
+
+Set subscription
+
+```bash
+source .env
+az login --tenant $TENANT
+az account set -s $SUBSCRIPTION
+```
+
+Create resource group, storage account, and functionapp service plan
+
+```bash
+source .env
+az group create --name $RESOURCE_GROUP \
+                --location $LOCATION
+# az storage account create --name $STORAGE_ACCOUNT \
+#                           --location $LOCATION \
+#                           --resource-group $RESOURCE_GROUP \
+#                           --sku $SKU_STORAGE
+az cosmosdb create \
+    --resource-group $RESOURCE_GROUP \
+    --name $COSMOS_NAME \
+    --locations regionName=$LOCATION \
+    --kind MongoDB
+```
+
+## Step 8 Publish function to function app
+
+Set function.json authLevel as anonymous to allow public visit
+
+```json
+"authLevel": "anonymous",
+```
+
+Publish function to app
+
+```bash
+func azure functionapp fetch-app-settings $FUNCTION_APP
+func azure storage fetch-connection-string $STORAGE_ACCOUNT
+func azure functionapp publish $FUNCTION_APP
+```
+
+Test in browser <https://xxxx.azurewebsites.net/api/myhttptrigger?name=yeaeeaeaehh>
+
+## Bonus A C# function
+
+Many MS demo app are in C#. So we give an example here
+
+<https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Clinux%2Ccsharp%2Cazurecli%2Cbash>
+
+```bash
+func init MyFunctionProj
+cd MyFunctionProj
+func new --template "Http Trigger" --name MyHttpTrigger
+```
+
+Visit to verify <http://localhost:7071/api/myhttptrigger?name=hahahhahaa>
+
+Set MyHttpTrigger.cs auth level as Anonymous to allow public visit
+
+```C#
+AuthorizationLevel.Anonymous
+```
+
+Publish function to app
+
+```bash
+source .env
+func azure functionapp fetch-app-settings $FUNCTION_APP
+func azure storage fetch-connection-string $STORAGE_ACCOUNT
+func azure functionapp publish $FUNCTION_APP
+```
+
+Verify at <https://xxxx.azurewebsites.net/api/myhttptrigger?name=1212121>
+
+**(Optional)** Also try your luck with .Net 7 x Function Core 4
+<https://devblogs.microsoft.com/dotnet/dotnet-7-comes-to-azure-functions/>
+
+<https://learn.microsoft.com/en-us/dotnet/core/install/linux-debian>
+
+```bash
+func init MyFunctionProj --worker-runtime dotnet-isolated --target-framework net7.0
+cd MyFunctionProj
+func new --template "HTTP trigger"
+func start
+```
 
 ## Step 1 Download azure function core
 
@@ -16,8 +129,6 @@ Download azure function core
 curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
 sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 ```
-
-## Step 2 Set up the APT source list
 
 Check distro ver
 
@@ -30,8 +141,6 @@ sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsof
 # Debian
 sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/debian/$(lsb_release -rs | cut -d'.' -f 1)/prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/dotnetdev.list'
 ```
-
-## Step 3 Install function core
 
 ```bash
 sudo apt-get update
@@ -95,120 +204,6 @@ Check in browser <http://localhost:7071/api/MyHttpTrigger?name=Azure%20Rocks>
 ## Step 6 Setup unit test (Python)
 
 Coming soon...
-
-## Step 7 Create a function app
-
-We need a function app to publish the function
-<https://learn.microsoft.com/en-us/azure/azure-functions/scripts/functions-cli-create-serverless>
-
-Install azure cli
-
-```bash
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-```
-
-Set app variables by saving in .env file
-
-```bash
-export SUBSCRIPTION="xxx"
-export TENANT="xxx"
-export LOCATION="eastus"
-export RESOURCE_GROUP="xxx"
-export STORAGE_ACCOUNT="xxx"
-export SKU_STORAGE="Standard_LRS"
-export FUNCTION_APP="xxx"
-export FUNCTION_VERSION="4"
-export PYTHON_VERSION="3.9"
-```
-
-Set subscription
-
-```bash
-source .env
-az login --tenant $TENANT
-az account set -s $SUBSCRIPTION
-```
-
-Create resource group, storage account, and functionapp service plan
-
-```bash
-source .env
-az group create --name $RESOURCE_GROUP \
-                --location $LOCATION
-az storage account create --name $STORAGE_ACCOUNT \
-                          --location $LOCATION \
-                          --resource-group $RESOURCE_GROUP \
-                          --sku $SKU_STORAGE
-az functionapp create --name $FUNCTION_APP \
-                      --storage-account $STORAGE_ACCOUNT \
-                      --consumption-plan-location $LOCATION \
-                      --resource-group $RESOURCE_GROUP \
-                      --functions-version $FUNCTION_VERSION \
-                      --os-type Linux \
-                      --runtime python \
-                      --runtime-version $PYTHON_VERSION
-```
-
-## Step 8 Publish function to function app
-
-Set function.json authLevel as anonymous to allow public visit
-
-```json
-"authLevel": "anonymous",
-```
-
-Publish function to app
-
-```bash
-func azure functionapp fetch-app-settings $FUNCTION_APP
-func azure storage fetch-connection-string $STORAGE_ACCOUNT
-func azure functionapp publish $FUNCTION_APP
-```
-
-Test in browser <https://xxxx.azurewebsites.net/api/myhttptrigger?name=yeaeeaeaehh>
-
-## Bonus A C# function
-
-Many MS demo app are in C#. So we give an example here
-
-<https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Clinux%2Ccsharp%2Cazurecli%2Cbash>
-
-```bash
-func init MyFunctionProj
-cd MyFunctionProj
-func new --template "Http Trigger" --name MyHttpTrigger
-```
-
-Visit to verify <http://localhost:7071/api/myhttptrigger?name=hahahhahaa>
-
-Set MyHttpTrigger.cs auth level as Anonymous to allow public visit
-
-```C#
-AuthorizationLevel.Anonymous
-```
-
-Publish function to app
-
-```bash
-source .env
-func azure functionapp fetch-app-settings $FUNCTION_APP
-func azure storage fetch-connection-string $STORAGE_ACCOUNT
-func azure functionapp publish $FUNCTION_APP
-```
-
-Verify at <https://xxxx.azurewebsites.net/api/myhttptrigger?name=1212121>
-
-**(Optional)** Also try your luck with .Net 7 x Function Core 4
-<https://devblogs.microsoft.com/dotnet/dotnet-7-comes-to-azure-functions/>
-
-<https://learn.microsoft.com/en-us/dotnet/core/install/linux-debian>
-
-```bash
-func init MyFunctionProj --worker-runtime dotnet-isolated --target-framework net7.0
-cd MyFunctionProj
-func new --template "HTTP trigger"
-func start
-```
 
 ## Finally Delete resources
 
