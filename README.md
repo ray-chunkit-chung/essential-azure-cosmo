@@ -69,10 +69,15 @@ export COSMOS_CONNECTION_STRING="$(az cosmosdb keys list \
         --name $COSMOS_NAME \
     | jq '.connectionStrings[0].connectionString' \
     | tr -d '"')"
-export NOSQL_ENDPOINT="$(az cosmosdb show \
+export COSMOS_ENDPOINT="$(az cosmosdb show \
         --resource-group $RESOURCE_GROUP \
         --name $COSMOS_NAME \
         --query "documentEndpoint" \
+    | tr -d '"')"
+export COSMOS_KEY="$(az cosmosdb keys list \
+        --resource-group $RESOURCE_GROUP \
+        --name $COSMOS_NAME \
+    | jq '.primaryMasterKey' \
     | tr -d '"')"
 ```
 
@@ -91,10 +96,16 @@ pip install -r requirements.txt
 ```
 
 Initiate collection
+
 ```bash
 python src/initiate_collection.py
 ```
 
+Run SQL query
+```bash
+# TODO: debug
+python src/run_sql_query.py
+```
 
 ## Step 3 SQL Query
 
