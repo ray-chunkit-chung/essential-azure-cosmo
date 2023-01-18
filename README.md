@@ -59,15 +59,17 @@ az cosmosdb create \
 ```
 
 Quick Delete
+
 ```bash
 az cosmosdb delete \
     --resource-group $RESOURCE_GROUP \
     --name $COSMOS_NAME
 ```
 
-
 ## Step 2 example python app to talk to comsos
+
 *
+
 Get cosmos connection string and nosql endpoints
 
 ```bash
@@ -109,15 +111,34 @@ pip install --upgrade -r requirements.txt
 python src/run_sql_mongo.py
 ```
 
-
 ## Bonus A Cosmos container
 
 Create cosmosdb without kind=MongoDB
+
 ```bash
+source .env
+az group create --name $RESOURCE_GROUP \
+                --location $LOCATION
 az cosmosdb create \
     --resource-group $RESOURCE_GROUP \
     --name $COSMOS_NAME \
     --locations regionName=$LOCATION
+export COSMOS_CONNECTION_STRING="$(az cosmosdb keys list \
+        --type connection-strings \
+        --resource-group $RESOURCE_GROUP \
+        --name $COSMOS_NAME \
+    | jq '.connectionStrings[0].connectionString' \
+    | tr -d '"')"
+export COSMOS_ENDPOINT="$(az cosmosdb show \
+        --resource-group $RESOURCE_GROUP \
+        --name $COSMOS_NAME \
+        --query "documentEndpoint" \
+    | tr -d '"')"
+export COSMOS_KEY="$(az cosmosdb keys list \
+        --resource-group $RESOURCE_GROUP \
+        --name $COSMOS_NAME \
+    | jq '.primaryMasterKey' \
+    | tr -d '"')"
 ```
 
 <https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/sdk-dotnet-v3>
@@ -129,8 +150,11 @@ az cosmosdb create \
 <https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/tutorial-dotnet-web-app>
 
 Run SQL query
+
 ```bash
-python src/run_sql_query.py
+source .venv/bin/activate
+pip install --upgrade -r requirements.txt
+python src/run_sql_cosmos.py
 ```
 
 ## Finally Delete resources
