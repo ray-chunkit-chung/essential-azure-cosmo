@@ -8,6 +8,7 @@ KEY = os.environ["COSMOS_KEY"]
 
 
 def initiate(client):
+    """ Initiate cosmos db/container/item"""
     database = client.create_database_if_not_exists(id="cosmicworks")
     partitionKeyPath = PartitionKey(path="/categoryId")
     container = database.create_container_if_not_exists(
@@ -48,13 +49,6 @@ def main():
 
     for item in items:
         print(json.dumps(item, indent=True))
-
-
-# TODO: debug
-# ActivityId: xxx, Microsoft.Azure.Documents.Common/2.14.0
-# Code: BadRequest
-# Message: Partition key path /categoryId is invalid for MongoDB API.
-# ActivityId: xxx, Microsoft.Azure.Documents.Common/2.14.0
 
 
 if __name__ == "__main__":

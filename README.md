@@ -58,11 +58,20 @@ az cosmosdb create \
     --kind MongoDB
 ```
 
-## Step 2 example python app to talk to comsos
+Quick Delete
+```bash
+az cosmosdb delete \
+    --resource-group $RESOURCE_GROUP \
+    --name $COSMOS_NAME
+```
 
+
+## Step 2 example python app to talk to comsos
+*
 Get cosmos connection string and nosql endpoints
 
 ```bash
+source .env
 export COSMOS_CONNECTION_STRING="$(az cosmosdb keys list \
         --type connection-strings \
         --resource-group $RESOURCE_GROUP \
@@ -89,19 +98,27 @@ sudo apt-get install -y python3 python3-dev python3-venv
 # export PYTHONPATH=/usr/bin/python
 # curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 # sudo python get-pip.py
-
 python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
 ```
 
-Initiate collection
+Run query on mongo
 
 ```bash
-python src/initiate_collection.py
+source .venv/bin/activate
+pip install --upgrade -r requirements.txt
+python src/run_sql_mongo.py
 ```
 
-## Step 3 SQL Query
+
+## Bonus A Cosmos container
+
+Create cosmosdb without kind=MongoDB
+```bash
+az cosmosdb create \
+    --resource-group $RESOURCE_GROUP \
+    --name $COSMOS_NAME \
+    --locations regionName=$LOCATION
+```
 
 <https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/sdk-dotnet-v3>
 
@@ -112,15 +129,7 @@ python src/initiate_collection.py
 <https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/tutorial-dotnet-web-app>
 
 Run SQL query
-
-```sql
-SELECT *
-FROM products p
-WHERE p.categoryId = @categoryId
-```
-
 ```bash
-# TODO: debug
 python src/run_sql_query.py
 ```
 

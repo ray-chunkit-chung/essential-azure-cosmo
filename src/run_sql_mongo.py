@@ -13,6 +13,7 @@ COLLECTION_NAME = "products"
 
 
 def initiate_cosmos_db(client):
+    """ Initiate mongo db/collection/document"""
 
     # Create database if it doesn't exist
     db = client[DB_NAME]
@@ -68,6 +69,8 @@ def main():
     # initiate an example collection
     client = pymongo.MongoClient(CONNECTION_STRING)
     collection, result = initiate_cosmos_db(client)
+
+    print("\n###########################################################")
 
     # Use the find_one method to get a document.
     doc = collection.find_one({"_id": result.upserted_id})
